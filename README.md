@@ -1,108 +1,156 @@
-# howlwheel
+# Howlwheel
 
-This project was created with [Better-T-Stack](https://github.com/AmanVarshney01/create-better-t-stack), a modern TypeScript stack that combines Next.js, Hono, TRPC, and more.
+A clean, self-hosted **wheel-of-dares spinner** for Twitch streams. An operator
+manages wheel slots from a control panel; an OBS browser source renders the wheel
+and animates a spin to a chosen or weighted-random result on cue.
 
-## Features
+Built with [Better-T-Stack](https://github.com/AmanVarshney01/create-better-t-stack):
+Next.js (App Router) + Hono on Cloudflare **Workers**, tRPC, Drizzle over **D1**,
+Turborepo, deployed with [Alchemy](https://alchemy.run). Same conventions as
+`wolfathon` (split public/protected topology, tokenized overlays, shared
+`AlertDialog` for destructive confirms). MIT licensed.
 
-- **TypeScript** - For type safety and improved developer experience
-- **Next.js** - Full-stack React framework
-- **TailwindCSS** - Utility-first CSS for rapid UI development
-- **Shared UI package** - shadcn/ui primitives live in `packages/ui`
-- **Hono** - Lightweight, performant server framework
-- **tRPC** - End-to-end type-safe APIs
-- **workers** - Runtime environment
-- **Drizzle** - TypeScript-first ORM
-- **Cloudflare D1** - Database engine
-- **PWA** - Progressive Web App support
-- **Turborepo** - Optimized monorepo build system
+## Two surfaces
 
-## Getting Started
+1. **Control panel** (`/control`) — operator-only, behind **Cloudflare Access**.
+   Edit slots (label, weight, colour, enable), drag-reorder, trigger a spin
+   (random or pick), see spin history, and grab the tokenized overlay URL.
+2. **Overlay widget** (`/overlay?t=<token>`) — public, **token-gated**. An OBS
+   browser source that renders the wheel and plays the spin animation, landing on
+   the result.
 
-First, install the dependencies:
+## Architecture
+
+```
+┌──────────────────────────────┐     ┌──────────────────────────────┐
+│  Web Worker (apps/web)        │     │  Overlay Worker (apps/server)│
+│  Next.js                      │     │  Hono                        │
+│  • /  /control   (Access)     │     │  • /trpc → publicRouter      │
+│  • /overlay      (public)     │     │    (token-gated reads)       │
+│  • /api/trpc → protectedRouter│     │                              │
+│      (behind Cloudflare Access)│    │  OBS polls here              │
+└───────────────┬──────────────┘     └───────────────┬──────────────┘
+                └───────────────┬────────────────────┘
+                            Cloudflare D1
+```
+
+- **Protected** procedures (`slots.*`, `settings.rotateOverlayToken`,
+  `spin.trigger`) are served **same-origin** from the web app at `/api/trpc`, so
+  the Cloudflare Access cookie + `Cf-Access-Jwt-Assertion` header are always
+  present. They're verified in `packages/api/src/access.ts` (JWT via `jose`).
+- **Public** procedures (`wheel.getPublic`, `spin.poll`) live on the overlay
+  Worker. OBS can't authenticate through Access, so the overlay's auth **is** a
+  secret token (`?t=`). Public responses carry render fields only — the token and
+  internal ids never leak.
+
+## Data model (`packages/db/src/schema`)
+
+- `slots` — `{ id, order, label, weight, color?, enabled }`
+- `spins` — history `{ id, slotId, label, at }`
+- `settings` — singleton `{ overlayToken, pendingSpin }`. `overlayToken` is
+  lazy-seeded (32-char hex); `pendingSpin` is the JSON channel
+  (`{ spinId, targetIndex, at }`) the overlay polls and animates to.
+
+On first run the database lazy-seeds the 2026 wheel-of-dares (10 push-ups, 20
+jumping jacks, 1-min dance break, embarrassing story, chat picks next game, chat
+picks title 15 min, best villain laugh, draw sona badly 60s, draw chat's request,
+free spin). See `packages/api/src/seed.ts`.
+
+### How the spin lands
+
+`spin.trigger` picks the slot (weighted-random server-side, or the given
+`slotId`), writes a `spins` row, and sets `pendingSpin` with the **target index**
+into the enabled-slots list. The overlay computes the same arcs from
+`wheel.getPublic`, then eases a multi-turn rotation to that index using the pure
+geometry in `packages/api/src/wheel.ts`. The landing math (`finalRotation` /
+`slotIndexAtPointer`) is round-trip tested.
+
+## Local development
 
 ```bash
 bun install
+
+# Overlay Worker + Next web, both under Alchemy dev (Miniflare D1):
+bun dev
+#    web    → http://localhost:3001
+#    server → http://localhost:3000
 ```
 
-## Database Setup
+`alchemy dev` sets `ACCESS_DISABLED=true` automatically, so `/control` is open
+locally (a stub `dev@localhost` user). **Access is always enforced on a real
+deploy** — it can't be turned off by a stray `.env`.
 
-This project uses Cloudflare D1 (SQLite) with Drizzle ORM.
+Open the control panel at `http://localhost:3001/control`, then the **Overlays**
+tab to copy the tokenized overlay URL into OBS.
 
-Runtime database access uses the Cloudflare `DB` binding from `packages/infra/alchemy.run.ts`. If a local `DATABASE_URL` is present, it is only for database tooling.
+Env templates: `apps/web/.env.example`, `apps/server/.env.example`,
+`packages/infra/.env.example`.
 
-Alchemy provisions the D1 database and applies migrations during `dev` and `deploy`.
+## Cloudflare Access
 
-1. Generate migration files:
+Gate the operator surface so only you can reach it:
+
+1. In the Cloudflare Zero Trust dashboard, create a **Self-hosted Access
+   application** covering your web app, scoped to these paths:
+   - `/control`
+   - `/api/trpc/*`
+
+   Leave `/overlay` and the overlay Worker **public** (OBS uses the token).
+2. Add an Access **policy** (e.g. allow your email).
+3. Copy the application's **Audience (AUD) tag** and your team domain into the
+   deploy env:
+   - `CF_ACCESS_TEAM_DOMAIN=yourteam.cloudflareaccess.com`
+   - `CF_ACCESS_AUD=<aud tag>`
+
+The web Worker verifies the `Cf-Access-Jwt-Assertion` JWT against
+`https://${CF_ACCESS_TEAM_DOMAIN}/cdn-cgi/access/certs`, checking `issuer` and
+`audience`. Empty values **fail closed** (everything denied) unless
+`ACCESS_DISABLED=true`.
+
+## Overlay token
+
+The overlay is authenticated by a secret token, not Access. From **Control →
+Overlays** you get `https://<web>/overlay?t=<token>` and a **Reset** action
+(confirmed with the shared `AlertDialog`) that rotates the token. Rotating
+invalidates old OBS URLs — re-copy after a reset. The token auto-seeds on first
+run; there is no env var for it.
+
+### OBS setup
+
+Add a **Browser Source**:
+- URL: the tokenized URL from the Overlays tab
+- Width `1920`, Height `1080`
+- Background is transparent
+
+## Deploy (Cloudflare via Alchemy)
+
+> Alchemy runs under **Node via `tsx`** — Bun 1.3.x segfaults on the Alchemy
+> program (same as wolfathon). The `deploy`/`destroy` scripts already use `tsx`.
 
 ```bash
-bun run db:generate
+# Fill packages/infra/.env (ALCHEMY_PASSWORD, CLOUDFLARE_API_TOKEN,
+# CLOUDFLARE_ACCOUNT_ID, CF_ACCESS_TEAM_DOMAIN, CF_ACCESS_AUD).
+bun run deploy     # → howlwheel.mrdemonwolf.workers.dev (web)
+                   #   howlwheel-api.mrdemonwolf.workers.dev (overlay API)
+bun run destroy    # tear down
 ```
 
-Then, run the development server:
+D1 migrations in `packages/db/src/migrations` are applied automatically on deploy.
+Regenerate after a schema change with `bun db:generate`.
+
+## Tests
 
 ```bash
-bun run dev
+cd packages/api && bun test
 ```
 
-Open [http://localhost:3001](http://localhost:3001) in your browser to see the web application.
-The API is running at [http://localhost:3000](http://localhost:3000).
+- `wheel.test.ts` — proves the overlay's `finalRotation` lands exactly on the
+  server-chosen index for every slot across weighted configs, and the
+  weighted-random pick respects weights.
+- `routers.test.ts` — proves public procedures never leak the overlay token or
+  internal fields, that a wrong/rotated token is rejected, and that
+  `spin.trigger`'s `targetIndex` maps to the same slot the overlay renders.
 
-## UI Customization
+## License
 
-React web apps in this stack share shadcn/ui primitives through `packages/ui`.
-
-- Change design tokens and global styles in `packages/ui/src/styles/globals.css`
-- Update shared primitives in `packages/ui/src/components/*`
-- Adjust shadcn aliases or style config in `packages/ui/components.json` and `apps/web/components.json`
-
-### Add more shared components
-
-Run this from the project root to add more primitives to the shared UI package:
-
-```bash
-npx shadcn@latest add accordion dialog popover sheet table -c packages/ui
-```
-
-Import shared components like this:
-
-```tsx
-import { Button } from "@howlwheel/ui/components/button";
-```
-
-### Add app-specific blocks
-
-If you want to add app-specific blocks instead of shared primitives, run the shadcn CLI from `apps/web`.
-
-## Deployment
-
-### Cloudflare via Alchemy
-
-- Target: web + server
-- Dev: bun run dev
-- Deploy: bun run deploy
-- Destroy: bun run destroy
-
-For more details, see the guide on [Deploying to Cloudflare with Alchemy](https://www.better-t-stack.dev/docs/guides/cloudflare-alchemy).
-
-## Project Structure
-
-```
-howlwheel/
-├── apps/
-│   ├── web/         # Frontend application (Next.js)
-│   └── server/      # Backend API (Hono, TRPC)
-├── packages/
-│   ├── ui/          # Shared shadcn/ui components and styles
-│   ├── api/         # API layer / business logic
-│   └── db/          # Database schema & queries
-```
-
-## Available Scripts
-
-- `bun run dev`: Start all applications in development mode
-- `bun run build`: Build all applications
-- `bun run dev:web`: Start only the web application
-- `bun run dev:server`: Start only the server
-- `bun run check-types`: Check TypeScript types across all apps
-- `bun run db:generate`: Generate database client/types
-- `cd apps/web && bun run generate-pwa-assets`: Generate PWA assets
+[MIT](./LICENSE) © MrDemonWolf, Inc.

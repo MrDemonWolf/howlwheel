@@ -31,6 +31,7 @@
     "dev": "turbo dev",
     "build": "turbo build",
     "check-types": "turbo check-types",
+    "test": "turbo test",
     "dev:web": "turbo -F web dev",
     "dev:server": "turbo -F server dev",
     "db:generate": "turbo -F @howlwheel/db db:generate",

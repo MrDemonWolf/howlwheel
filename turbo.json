@@ -17,14 +17,31 @@
       "cache": false,
       "persistent": true
     },
+    "test": {
+      "cache": false
+    },
     "db:generate": {
       "cache": false
     },
     "deploy": {
-      "cache": false
+      "cache": false,
+      "passThroughEnv": [
+        "ALCHEMY_PASSWORD",
+        "CLOUDFLARE_API_TOKEN",
+        "CLOUDFLARE_ACCOUNT_ID",
+        "WEB_URL",
+        "CORS_ORIGIN",
+        "CF_ACCESS_TEAM_DOMAIN",
+        "CF_ACCESS_AUD"
+      ]
     },
     "destroy": {
-      "cache": false
+      "cache": false,
+      "passThroughEnv": [
+        "ALCHEMY_PASSWORD",
+        "CLOUDFLARE_API_TOKEN",
+        "CLOUDFLARE_ACCOUNT_ID"
+      ]
     }
   }
 }

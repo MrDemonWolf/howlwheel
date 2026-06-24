@@ -26,7 +26,6 @@
     "types": ["@cloudflare/workers-types"]
   },
   "include": [
-    "../server/env.d.ts",
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
