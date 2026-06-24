@@ -1,0 +1,3 @@
+{
+  "extends": "@howlwheel/config/tsconfig.base.json"
+}
