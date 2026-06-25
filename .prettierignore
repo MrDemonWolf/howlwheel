@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.next/
+.turbo/
+.open-next/
+.wrangler/
+.alchemy/
+.source/
+.claude/worktrees/
+out/
+bun.lock
+*.lock
