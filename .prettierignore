@@ -6,6 +6,7 @@ dist/
 .wrangler/
 .alchemy/
 .source/
+.claude/worktrees/
 out/
 bun.lock
 *.lock
