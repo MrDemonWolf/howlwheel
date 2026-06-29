@@ -16,6 +16,7 @@ export default tseslint.config(
 			"**/.wrangler/**",
 			"**/.alchemy/**",
 			"**/.source/**",
+			"**/.claude/worktrees/**",
 			"**/out/**",
 			"**/public/sw.js",
 			"**/public/workbox-*.js",
