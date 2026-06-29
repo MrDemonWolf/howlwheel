@@ -6,125 +6,329 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/*
+ * MrDemonWolf brand palette
+ *   navy        #091533  (base)
+ *   cyan        #00ACED  (accent)
+ *   light cyan  #5BC8F0  (secondary)
+ *   white text is allowed for overlay readability (not used as a brand fill).
+ *
+ * Howlwheel ships a single dark, navy theme — there is no light mode.
+ */
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.58 0.22 27);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.809 0.105 251.813);
-  --chart-2: oklch(0.623 0.214 259.815);
-  --chart-3: oklch(0.546 0.245 262.881);
-  --chart-4: oklch(0.488 0.243 264.376);
-  --chart-5: oklch(0.424 0.199 265.638);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+	--background: #091533;
+	--foreground: #ffffff;
+	--card: #0c1b40;
+	--card-foreground: #ffffff;
+	--popover: #0c1b40;
+	--popover-foreground: #ffffff;
+	--primary: #00aced;
+	--primary-foreground: #04122b;
+	--secondary: #13244d;
+	--secondary-foreground: #ffffff;
+	--muted: #122247;
+	--muted-foreground: #9db4d8;
+	--accent: #5bc8f0;
+	--accent-foreground: #04122b;
+	--destructive: #f0556a;
+	--border: #21345f;
+	--input: #21345f;
+	--ring: #00aced;
+	--chart-1: #00aced;
+	--chart-2: #5bc8f0;
+	--chart-3: #3a86c9;
+	--chart-4: #6f7fd6;
+	--chart-5: #2b3f73;
+	--radius: 1.15rem;
+	/*
+	 * Liquid Glass material (macOS 26 Tahoe, tinted to the navy/cyan brand).
+	 *   --glass-*      translucent frosted fills, layered light→dark
+	 *   --glass-edge   the signature specular hairline on the top edge
+	 *   --glass-stroke content-aware border
+	 *   --glass-blur   backdrop blur+saturate amount
+	 */
+	--glass-1: rgba(18, 34, 71, 0.66);
+	--glass-2: rgba(9, 21, 51, 0.58);
+	--glass-edge: rgba(255, 255, 255, 0.1);
+	--glass-stroke: rgba(120, 190, 240, 0.16);
+	--glass-blur: blur(22px) saturate(165%);
+	--sidebar: #0c1b40;
+	--sidebar-foreground: #ffffff;
+	--sidebar-primary: #00aced;
+	--sidebar-primary-foreground: #04122b;
+	--sidebar-accent: #13244d;
+	--sidebar-accent-foreground: #ffffff;
+	--sidebar-border: #21345f;
+	--sidebar-ring: #00aced;
 }
 
+/* Keep `.dark` identical so next-themes can't desync the brand look. */
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.87 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.371 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.809 0.105 251.813);
-  --chart-2: oklch(0.623 0.214 259.815);
-  --chart-3: oklch(0.546 0.245 262.881);
-  --chart-4: oklch(0.488 0.243 264.376);
-  --chart-5: oklch(0.424 0.199 265.638);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+	--background: #091533;
+	--foreground: #ffffff;
+	--card: #0c1b40;
+	--card-foreground: #ffffff;
+	--popover: #0c1b40;
+	--popover-foreground: #ffffff;
+	--primary: #00aced;
+	--primary-foreground: #04122b;
+	--secondary: #13244d;
+	--secondary-foreground: #ffffff;
+	--muted: #122247;
+	--muted-foreground: #9db4d8;
+	--accent: #5bc8f0;
+	--accent-foreground: #04122b;
+	--destructive: #f0556a;
+	--border: #21345f;
+	--input: #21345f;
+	--ring: #00aced;
+	--sidebar: #0c1b40;
+	--sidebar-foreground: #ffffff;
+	--sidebar-primary: #00aced;
+	--sidebar-primary-foreground: #04122b;
+	--sidebar-accent: #13244d;
+	--sidebar-accent-foreground: #ffffff;
+	--sidebar-border: #21345f;
+	--sidebar-ring: #00aced;
 }
 
 @theme inline {
-  --font-sans: "Inter Variable", sans-serif;
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
-  --color-card: var(--card);
-  --color-foreground: var(--foreground);
-  --color-background: var(--background);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --radius-2xl: calc(var(--radius) + 8px);
-  --radius-3xl: calc(var(--radius) + 12px);
-  --radius-4xl: calc(var(--radius) + 16px);
+	--font-sans: var(--font-roboto), ui-sans-serif, system-ui, sans-serif;
+	--font-heading: var(--font-montserrat), ui-sans-serif, system-ui, sans-serif;
+	--color-sidebar-ring: var(--sidebar-ring);
+	--color-sidebar-border: var(--sidebar-border);
+	--color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+	--color-sidebar-accent: var(--sidebar-accent);
+	--color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+	--color-sidebar-primary: var(--sidebar-primary);
+	--color-sidebar-foreground: var(--sidebar-foreground);
+	--color-sidebar: var(--sidebar);
+	--color-chart-5: var(--chart-5);
+	--color-chart-4: var(--chart-4);
+	--color-chart-3: var(--chart-3);
+	--color-chart-2: var(--chart-2);
+	--color-chart-1: var(--chart-1);
+	--color-ring: var(--ring);
+	--color-input: var(--input);
+	--color-border: var(--border);
+	--color-destructive: var(--destructive);
+	--color-accent-foreground: var(--accent-foreground);
+	--color-accent: var(--accent);
+	--color-muted-foreground: var(--muted-foreground);
+	--color-muted: var(--muted);
+	--color-secondary-foreground: var(--secondary-foreground);
+	--color-secondary: var(--secondary);
+	--color-primary-foreground: var(--primary-foreground);
+	--color-primary: var(--primary);
+	--color-popover-foreground: var(--popover-foreground);
+	--color-popover: var(--popover);
+	--color-card-foreground: var(--card-foreground);
+	--color-card: var(--card);
+	--color-foreground: var(--foreground);
+	--color-background: var(--background);
+	--radius-sm: calc(var(--radius) - 4px);
+	--radius-md: calc(var(--radius) - 2px);
+	--radius-lg: var(--radius);
+	--radius-xl: calc(var(--radius) + 4px);
+	--radius-2xl: calc(var(--radius) + 8px);
+	--radius-3xl: calc(var(--radius) + 12px);
+	--radius-4xl: calc(var(--radius) + 16px);
 }
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply font-sans bg-background text-foreground;
-  }
-  html {
-    @apply font-sans;
-  }
+	* {
+		@apply border-border outline-ring/50;
+	}
+	/*
+   * The body itself is transparent so the /overlay route is clean over an OBS
+   * source. The panel routes paint their own navy background (see the panel
+   * layout), and the overlay only renders its floating wheel.
+   */
+	body {
+		@apply text-foreground font-sans;
+		background: transparent;
+	}
+	html {
+		@apply font-sans;
+	}
+}
+
+/* Result celebration: glow + pop, no audio. */
+@keyframes wolf-pop {
+	0% {
+		transform: scale(0.6);
+		opacity: 0;
+	}
+	60% {
+		transform: scale(1.12);
+		opacity: 1;
+	}
+	100% {
+		transform: scale(1);
+		opacity: 1;
+	}
+}
+
+@keyframes wolf-glow {
+	0%,
+	100% {
+		text-shadow: 0 0 16px rgba(0, 172, 237, 0.45);
+	}
+	50% {
+		text-shadow: 0 0 34px rgba(91, 200, 240, 0.9);
+	}
+}
+
+@keyframes wolf-rise {
+	0% {
+		transform: translateY(10px);
+		opacity: 0;
+	}
+	100% {
+		transform: translateY(0);
+		opacity: 1;
+	}
+}
+
+.animate-wolf-pop {
+	animation: wolf-pop 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.animate-wolf-rise {
+	animation: wolf-rise 0.4s ease-out both;
+}
+
+.wolf-glow {
+	animation: wolf-glow 2.4s ease-in-out infinite;
+}
+
+@keyframes spin-slow {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+.animate-spin-slow {
+	animation: spin-slow 14s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.animate-wolf-pop,
+	.animate-wolf-rise {
+		animation: none;
+	}
+	.animate-spin-slow {
+		animation: none;
+	}
+}
+
+/*
+ * ── Liquid Glass operator-surface kit (macOS 26 Tahoe) ──────────────────────
+ * The /overlay route stays transparent for OBS; these classes give the
+ * landing/control pages translucent frosted "glass" surfaces that float over a
+ * deep, atmospheric navy backdrop tinted to the brand cyan.
+ */
+
+.app-bg {
+	background-color: var(--background);
+	background-image:
+		radial-gradient(58% 44% at 50% -14%, rgba(0, 172, 237, 0.18), transparent 72%),
+		radial-gradient(46% 40% at 100% 4%, rgba(91, 200, 240, 0.1), transparent 70%),
+		radial-gradient(50% 50% at 0% 18%, rgba(124, 77, 255, 0.07), transparent 70%),
+		linear-gradient(rgba(0, 172, 237, 0.03) 1px, transparent 1px),
+		linear-gradient(90deg, rgba(0, 172, 237, 0.03) 1px, transparent 1px);
+	background-size:
+		auto,
+		auto,
+		auto,
+		54px 54px,
+		54px 54px;
+	background-attachment: fixed, fixed, fixed, scroll, scroll;
+}
+
+.panel-card {
+	position: relative;
+	border: 1px solid var(--glass-stroke);
+	background: linear-gradient(155deg, var(--glass-1) 0%, var(--glass-2) 100%);
+	-webkit-backdrop-filter: var(--glass-blur);
+	backdrop-filter: var(--glass-blur);
+	box-shadow:
+		inset 0 1px 0 var(--glass-edge),
+		inset 0 0 0 1px rgba(0, 172, 237, 0.03),
+		0 1px 2px rgba(0, 0, 0, 0.35),
+		0 24px 56px -32px rgba(0, 0, 0, 0.9);
+}
+
+.panel-card::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	border-radius: inherit;
+	pointer-events: none;
+	background: radial-gradient(120% 80% at 0% 0%, rgba(91, 200, 240, 0.08), transparent 56%);
+}
+
+.panel-card-rail {
+	overflow: hidden;
+}
+.panel-card-rail::before {
+	content: "";
+	position: absolute;
+	inset: 0 auto 0 0;
+	width: 3px;
+	z-index: 1;
+	background: linear-gradient(to bottom, #5bc8f0, #00aced 55%, rgba(0, 172, 237, 0));
+	box-shadow: 0 0 16px rgba(0, 172, 237, 0.75);
+}
+
+.glass-bar {
+	border: 1px solid var(--glass-stroke);
+	background: linear-gradient(160deg, rgba(18, 34, 71, 0.72), rgba(9, 21, 51, 0.62));
+	-webkit-backdrop-filter: var(--glass-blur);
+	backdrop-filter: var(--glass-blur);
+	box-shadow:
+		inset 0 1px 0 var(--glass-edge),
+		0 8px 28px -16px rgba(0, 0, 0, 0.85);
+}
+
+/* Glass segmented control (macOS-style tabs). */
+.segmented {
+	border: 1px solid var(--glass-stroke);
+	background: rgba(8, 18, 44, 0.5);
+	-webkit-backdrop-filter: var(--glass-blur);
+	backdrop-filter: var(--glass-blur);
+	box-shadow: inset 0 1px 0 var(--glass-edge);
+}
+.segmented-on {
+	background: linear-gradient(160deg, rgba(0, 172, 237, 0.95), rgba(0, 140, 200, 0.9));
+	box-shadow:
+		inset 0 1px 0 rgba(255, 255, 255, 0.35),
+		0 4px 14px -4px rgba(0, 172, 237, 0.6);
+}
+
+/* Uppercase tracked label used as a section eyebrow. */
+.eyebrow {
+	font-family: var(--font-heading);
+	text-transform: uppercase;
+	letter-spacing: 0.26em;
+	font-weight: 700;
+	color: #5bc8f0;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+	.panel-card,
+	.glass-bar,
+	.segmented {
+		-webkit-backdrop-filter: none;
+		backdrop-filter: none;
+		background: linear-gradient(155deg, #0c1b40, #081530);
+	}
+}
+
+@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+	.panel-card,
+	.glass-bar,
+	.segmented {
+		background: linear-gradient(155deg, #0c1b40, #081530);
+	}
 }

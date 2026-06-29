@@ -8,38 +8,70 @@ config({ path: "./.env" });
 config({ path: "../../apps/web/.env" });
 config({ path: "../../apps/server/.env" });
 
-const app = await alchemy("howlwheel");
+// Run under Node (via tsx) rather than Bun — Bun 1.3.x segfaults executing this
+// Alchemy program. The deploy/destroy scripts in package.json use tsx; `--destroy`
+// selects the teardown phase, otherwise Alchemy auto-detects (deploy / dev).
+const app = await alchemy("howlwheel", {
+	phase: process.argv.includes("--destroy") ? "destroy" : undefined,
+});
+
+// Access bypass is allowed ONLY for local `alchemy dev` (app.local === true).
+// A real deploy ALWAYS enforces Cloudflare Access — it can never be disabled by
+// a stray .env, so the control panel can't ship unprotected.
+const ACCESS_DISABLED = app.local ? "true" : "false";
+
+// Fixed production hosts. Worker names below set their workers.dev subdomains:
+//   web -> howlwheel.mrdemonwolf.workers.dev
+//   api -> howlwheel-api.mrdemonwolf.workers.dev
+const WEB_URL = process.env.WEB_URL ?? "https://howlwheel.mrdemonwolf.workers.dev";
+// Origin allowed to call the overlay API. Dev sets this in apps/server/.env;
+// in production it defaults to the deployed web app.
+const CORS_ORIGIN = process.env.CORS_ORIGIN ?? WEB_URL;
 
 const db = await D1Database("database", {
-  migrationsDir: "../../packages/db/src/migrations",
+	migrationsDir: "../../packages/db/src/migrations",
+	// Adopt existing resources by name so CI/CD can deploy without sharing the
+	// local Alchemy state file (each run reconciles the live resource).
+	adopt: true,
 });
 
-export const server = await Worker("server", {
-  cwd: "../../apps/server",
-  entrypoint: "src/index.ts",
-  compatibility: "node",
-  url: true,
-  bindings: {
-    DB: db,
-    CORS_ORIGIN: alchemy.env.CORS_ORIGIN!,
-  },
-  dev: {
-    port: 3000,
-  },
+export const server = await Worker("howlwheel-api", {
+	// Explicit script name → howlwheel-api.<subdomain>.workers.dev
+	name: "howlwheel-api",
+	adopt: true,
+	cwd: "../../apps/server",
+	entrypoint: "src/index.ts",
+	compatibility: "node",
+	url: true,
+	bindings: {
+		DB: db,
+		CORS_ORIGIN,
+	},
+	dev: {
+		port: 3000,
+	},
 });
 
-export const web = await Nextjs("web", {
-  cwd: "../../apps/web",
-  bindings: {
-    NEXT_PUBLIC_SERVER_URL: server.url!,
-    DB: db,
-    CORS_ORIGIN: alchemy.env.CORS_ORIGIN!,
-  },
-  dev: {
-    env: {
-      PORT: "3001",
-    },
-  },
+export const web = await Nextjs("howlwheel", {
+	// Explicit script name → howlwheel.<subdomain>.workers.dev
+	name: "howlwheel",
+	adopt: true,
+	cwd: "../../apps/web",
+	bindings: {
+		NEXT_PUBLIC_SERVER_URL: server.url!,
+		DB: db,
+		CORS_ORIGIN,
+		// Cloudflare Access — gates `/control` + `/api/trpc`. See README.
+		// Empty values fail closed (everything denied) unless ACCESS_DISABLED=true.
+		CF_ACCESS_TEAM_DOMAIN: process.env.CF_ACCESS_TEAM_DOMAIN ?? "",
+		CF_ACCESS_AUD: process.env.CF_ACCESS_AUD ?? "",
+		ACCESS_DISABLED,
+	},
+	dev: {
+		env: {
+			PORT: "3001",
+		},
+	},
 });
 
 console.log(`Web    -> ${web.url}`);

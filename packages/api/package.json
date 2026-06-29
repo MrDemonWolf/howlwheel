@@ -9,17 +9,23 @@
       "default": "./src/*.ts"
     }
   },
-  "scripts": {},
+  "scripts": {
+    "test": "bun test",
+    "check-types": "tsc --noEmit"
+  },
   "dependencies": {
     "@howlwheel/db": "workspace:*",
     "@howlwheel/env": "workspace:*",
     "@trpc/client": "catalog:",
     "@trpc/server": "catalog:",
     "dotenv": "catalog:",
+    "jose": "^5.9.6",
     "zod": "catalog:"
   },
   "devDependencies": {
     "@howlwheel/config": "workspace:*",
+    "@types/bun": "^1.2.5",
+    "drizzle-orm": "^0.45.1",
     "hono": "catalog:",
     "typescript": "catalog:"
   }

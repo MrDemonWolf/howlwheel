@@ -5,10 +5,12 @@
   "scripts": {
     "build": "next build",
     "start": "next start",
-    "dev:bare": "next dev --port 3001"
+    "dev:bare": "next dev --port 3001",
+    "check-types": "tsc --noEmit"
   },
   "dependencies": {
     "@howlwheel/api": "workspace:*",
+    "@howlwheel/db": "workspace:*",
     "@howlwheel/env": "workspace:*",
     "@howlwheel/ui": "workspace:*",
     "@opennextjs/cloudflare": "^1.17.3",
